@@ -25,15 +25,21 @@ config = {
     
     "get_user_func": lambda r: KeyError("No function exists to get the user"),
     "get_user": AUser,
+    
+    # I use this at work so it's an opportunity to check that the user's not been blocked
+    "check_blocked": lambda r: None,
 }
 
 # This is a copy of how I'm setting up my Odummo configuration
-#     from .games import odummo
-#     config.include(odummo, route_prefix="odummo")
-#     odummo.config.config['layout'] = '../../../templates/layouts/viewer.pt'
-#     odummo.config.config['DBSession'] = DBSession
-#     odummo.config.config['User'] = models.User
-    
-#     odummo.config.config['get_user_func']      = lambda r: r.user
-#     odummo.config.config['user.id_property']   = "id"
-#     odummo.config.config['user.name_property'] = "name"
+# from .games import odummo
+# config.include(odummo, route_prefix="odummo")
+# odummo.config.config['layout'] = '../../../templates/layouts/viewer.pt'
+# odummo.config.config['DBSession'] = DBSession
+# odummo.config.config['User'] = models.User
+
+# odummo.config.config['get_user_func']      = lambda r: r.user
+# odummo.config.config['user.id_property']   = "id"
+# odummo.config.config['user.name_property'] = "name"
+# def _game_check(request):
+#     if request.user.blocked: raise HTTPFound(location="/")
+# odummo.config.config['check_blocked'] = _game_check
