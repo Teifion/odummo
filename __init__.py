@@ -1,8 +1,40 @@
+def odummo_nimblescan():
+    try:
+        from ...nimblescan import api
+    except ImportError:
+        try:
+            from ..nimblescan import api
+        except ImportError:
+            return
+    
+    api.register('odummo.menu', "Connect 4 - Menu", ['games'], (lambda r: True), api.make_forwarder("odummo.menu"))
+    api.register('odummo.new_game', "Connect 4 - New game", ['games'], (lambda r: True), api.make_form_forwarder("odummo.new_game", []), '<label for="ns_opponent">Opponent:</label> <input type="text" name="opponent_name" id="ns_opponent" value="" style="display:inline-block;"/>')
+    api.register('odummo.stats', "Connect 4 - Stats", ['games'], (lambda r: True), api.make_forwarder("odummo.stats"))
+    api.register('odummo.preferences', "Connect 4 - Preferences", ['games'], (lambda r: True), api.make_forwarder("odummo.preferences"))
+
+def odummo_notifications():
+    try:
+        from ...communique import register, send
+    except ImportError:
+        try:
+            from ..communique import register, send
+        except ImportError:
+            return
+    
+    from .lib.notifications import forward_to_game, forward_to_profile
+    
+    register('odummo.new_move', 'New move', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
+    register('odummo.end_game', 'Game over', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
+    register('odummo.win_game', 'Victory!', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
+
 def includeme(config):
     from .views import (
         general,
         game,
     )
+    
+    odummo_notifications()
+    odummo_nimblescan()
     
     # General views
     config.add_route('odummo.menu', '/menu')

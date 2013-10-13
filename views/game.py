@@ -98,7 +98,7 @@ def make_move(request):
     message = ""
     flash_colour = "A00"
     
-    game_id  = int(request.params['game_id'])
+    game_id  = int(request.matchdict['game_id'])
     square   = int(request.params['square'])
     
     the_game = db.get_game(game_id)
@@ -106,7 +106,7 @@ def make_move(request):
     
     if current_player == the_user.id:
         try:
-            if not rules.is_move_valid(the_game.active_board, the_game.current_state, square):
+            if not rules.is_move_valid(the_game.current_state, the_game.turn, square):
                 raise Exception("Invalid move")
             db.perform_move(the_game, square)
             com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))

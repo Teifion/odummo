@@ -10,3 +10,8 @@ def current_player(the_game):
         return the_game.player1
     else:
         return the_game.player2
+
+def is_move_valid(current_state, turn, square):
+    player = (turn % 2) + 1
+    
+    return True

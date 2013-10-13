@@ -130,3 +130,21 @@ def get_game(game_id):
         raise ValueError("We were unable to find the game")
     
     return the_game
+
+def perform_move(the_game, square):
+    # add_turn(the_game, square)
+    # actions.perform_move(the_game, square)
+    # the_game.turn += 1
+    
+    # rules.check_for_sub_win(the_game, square)
+    
+    # end_result = rules.test_win(the_game.overall_state)
+    # if end_result in ("1", "2"):
+    #     end_game(the_game)
+    # elif " " not in the_game.current_state:
+    #     draw_game(the_game)
+    # else:
+    #     actions.set_active_board(the_game, square)
+    
+    # config['DBSession'].add(the_game)
+    pass
