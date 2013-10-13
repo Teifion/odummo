@@ -17,9 +17,9 @@ from sqlalchemy import or_, not_, and_
 from sqlalchemy import func
 import datetime
 
-# from . import (
-#     rules,
-# )
+from . import (
+    rules,
+)
 
 def get_profile(user_id):
     the_profile = config['DBSession'].query(OdummoProfile).filter(OdummoProfile.user == user_id).first()
@@ -83,3 +83,50 @@ def get_recent_game_list(user_id, limit=5):
     return config['DBSession'].query(
         OdummoGame.id, User.name, OdummoGame.turn, OdummoGame.winner
     ).filter(*filters).order_by(OdummoGame.id.desc()).limit(limit)
+
+def find_user(identifier):
+    User = config['User']
+    
+    if type(identifier) == str:
+        found = config['DBSession'].query(User.id).filter(User.name == identifier).first()
+        if found == None:
+            return None
+        return config['get_user']({'id':found[0], 'name':identifier})
+    
+    elif type(identifier) == int:
+        found = config['DBSession'].query(User.name).filter(User.id == identifier).first()
+        if found == None:
+            return None
+        return config['get_user']({'id':identifier, 'name':found[0]})
+    
+    else:
+        raise KeyError("No handler for identifier type of '{}'".format(type(identifier)))
+
+def new_game(p1, p2, rematch=None):
+    game               = OdummoGame()
+    game.player1       = p1.id
+    game.player2       = p2.id
+    game.started       = datetime.datetime.now()
+    game.turn          = 0
+    game.source        = rematch
+    
+    game.current_state = str(rules.empty_board)
+    game.active_board  = -1
+    
+    config['DBSession'].add(game)
+    
+    # Get game ID
+    game_id = config['DBSession'].query(OdummoGame.id).filter(
+        OdummoGame.player1 == p1.id,
+        OdummoGame.player2 == p2.id,
+    ).order_by(OdummoGame.id.desc()).first()[0]
+    
+    return game_id
+
+def get_game(game_id):
+    the_game = config['DBSession'].query(OdummoGame).filter(OdummoGame.id == game_id).first()
+    
+    if the_game == None:
+        raise ValueError("We were unable to find the game")
+    
+    return the_game
