@@ -40,7 +40,34 @@ def stats(request):
     pass
 
 def preferences(request):
-    pass
+    config['check_blocked'](request)
+    the_user = config['get_user_func'](request)
+    profile = db.get_profile(the_user.id)
+    layout = get_renderer(config['layout']).implementation()
+    message = ""
+    
+    if "preferred_colour" in request.params:
+        preferred_colour = request.params['preferred_colour']
+        if preferred_colour == "true":
+            profile.preferred_colour = True
+        else:
+            profile.preferred_colour = False
+        
+        matchmaking = request.params['matchmaking']
+        if matchmaking == "true":
+            profile.matchmaking = True
+        else:
+            profile.matchmaking = False
+        
+        message = "Changes saved"
+    
+    return dict(
+        title    = "Ultimate O's and X's preferences",
+        layout   = layout,
+        the_user = the_user,
+        profile  = profile,
+        message  = message,
+    )
 
 def head_to_head_stats(request):
     pass

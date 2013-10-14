@@ -60,7 +60,7 @@ def includeme(config):
     config.add_view(game.rematch, route_name='odummo.rematch', renderer='string', permission='loggedin')
     
     config.add_view(game.view_game, route_name='odummo.view_game', renderer='templates/game/view_game.pt', permission='loggedin')
-    config.add_view(game.make_move, route_name='odummo.make_move', renderer='string', permission='loggedin')
+    config.add_view(game.make_move, route_name='odummo.make_move', renderer='templates/game/make_move.pt', permission='loggedin')
     config.add_view(general.matchmake, route_name='odummo.matchmake', renderer='templates/general/matchmake.pt', permission='loggedin')
     config.add_view(game.check_turn, route_name='odummo.check_turn', renderer='string', permission='loggedin')
     

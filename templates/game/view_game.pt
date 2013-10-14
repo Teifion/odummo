@@ -85,17 +85,18 @@
         
         .player1_block
         {
-            background-color: #06A;
-            color: #FFF;
+            background-color: #FFF;
+            color: #000;
         }
         
         .player2_block
         {
-            background-color: #CC2;
+            background-color: #333;
+            color: #FFF;
         }
     </style>
     <div metal:fill-slot="header_buttons" style="display:inline-block;">
-        <a class="inbutton" href="${request.route_url('odummo.menu')}">Odummo menu</a>
+        <a class="inbutton homebutton" href="${request.route_url('odummo.menu')}">Odummo menu</a>
     </div>
     <div metal:fill-slot="content">
         <script type="text/javascript" charset="utf-8">
@@ -161,10 +162,10 @@
         <br /><br />
         
         <div class="player1_block" tal:condition="profile.preferred_colour">
-            You are the blue player, playing against ${opponent.name}
+            You are the white player, playing against ${opponent.name}
         </div>
         <div class="player2_block" tal:condition="not profile.preferred_colour">
-            You are the yellow player, playing against ${opponent.name}
+            You are the black player, playing against ${opponent.name}
         </div>
         
         <div id="the_game">
@@ -172,11 +173,23 @@
                 <a class="empty" tal:condition="s == ' '" href="${request.route_url('odummo.make_move', game_id=the_game.id)}?square=${i}">
                     &nbsp;
                 </a>
-                <div class="player1" tal:condition="s == '1'">
-                    &nbsp;
+                
+                <div tal:condition="profile.preferred_colour">
+                    <div class="player2" tal:condition="s == '1'">
+                        &nbsp;
+                    </div>
+                    <div class="player1" tal:condition="s == '2'">
+                        &nbsp;
+                    </div>
                 </div>
-                <div class="player2" tal:condition="s == '2'">
-                    &nbsp;
+                
+                <div tal:condition="not profile.preferred_colour">
+                    <div class="player1" tal:condition="s == '1'">
+                        &nbsp;
+                    </div>
+                    <div class="player2" tal:condition="s == '2'">
+                        &nbsp;
+                    </div>
                 </div>
             </div>
         </div>

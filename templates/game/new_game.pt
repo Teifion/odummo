@@ -9,7 +9,7 @@
         }
     </style>
     <div metal:fill-slot="header_buttons" style="display:inline-block;">
-        <a class="inbutton" href="${request.route_url('odummo.menu')}">Odummo menu</a>
+        <a class="inbutton homebutton" href="${request.route_url('odummo.menu')}">Odummo menu</a>
     </div>
     <div metal:fill-slot="content">
         <script type="text/javascript" charset="utf-8">

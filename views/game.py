@@ -105,15 +105,15 @@ def make_move(request):
     current_player = rules.current_player(the_game)
     
     if current_player == the_user.id:
-        try:
-            if not rules.is_move_valid(the_game.current_state, the_game.turn, square):
-                raise Exception("Invalid move")
+        valid_move = rules.is_move_valid(the_game.current_state, the_game.turn, square)
+        
+        if valid_move == "Valid":
             db.perform_move(the_game, square)
-            com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))
+            # com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))
             return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
-        except Exception as e:
-            raise
-            message = e.args[0]
+        else:
+            message = valid_move
+        
     else:
         message = "It is not your turn"
     

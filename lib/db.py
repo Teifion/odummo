@@ -15,7 +15,7 @@ from ..models import (
 
 from sqlalchemy import or_, not_, and_
 from sqlalchemy import func
-import datetime
+from datetime import datetime
 
 from . import (
     rules,
@@ -106,7 +106,7 @@ def new_game(p1, p2, rematch=None):
     game               = OdummoGame()
     game.player1       = p1.id
     game.player2       = p2.id
-    game.started       = datetime.datetime.now()
+    game.started       = datetime.now()
     game.turn          = 0
     game.source        = rematch
     
@@ -132,19 +132,28 @@ def get_game(game_id):
     return the_game
 
 def perform_move(the_game, square):
-    # add_turn(the_game, square)
-    # actions.perform_move(the_game, square)
-    # the_game.turn += 1
+    board = list(the_game.current_state)
+    board[square] = str((the_game.turn % 2) + 1)
+    the_game.current_state = "".join(board)
     
-    # rules.check_for_sub_win(the_game, square)
+    add_turn(the_game, square)
+    the_game.turn += 1
     
-    # end_result = rules.test_win(the_game.overall_state)
-    # if end_result in ("1", "2"):
-    #     end_game(the_game)
-    # elif " " not in the_game.current_state:
-    #     draw_game(the_game)
-    # else:
-    #     actions.set_active_board(the_game, square)
+    end_result = rules.check_for_win(the_game)
     
-    # config['DBSession'].add(the_game)
-    pass
+    if end_result in ("1", "2"):
+        end_game(the_game)
+    elif " " not in the_game.current_state:
+        draw_game(the_game)
+    
+    config['DBSession'].add(the_game)
+
+def add_turn(the_game, square):
+    new_turn           = OdummoMove()
+    new_turn.game      = the_game.id
+    new_turn.player    = rules.current_player(the_game)
+    
+    new_turn.move      = square
+    new_turn.timestamp = datetime.now()
+    
+    config['DBSession'].add(new_turn)
