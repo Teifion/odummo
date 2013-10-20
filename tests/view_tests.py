@@ -1,4 +1,3 @@
-import unittest
 import datetime
 import transaction
 from ..lib import (
@@ -54,8 +53,8 @@ except Exception:
 This assumes the path prefix is "odummo".
 """
 
-class DBTester(DBTestClass):
-    def test_notifications(self):
+class OdummoDBTester(DBTestClass):
+    def ttest_notifications(self):
         r = testing.DummyRequest()
         
         # We don't test the validity, just that they'll work if we pass them data
@@ -77,7 +76,7 @@ class DBTester(DBTestClass):
             config['DBSession'].execute('COMMIT')
         
         User = config['User']
-        u1, u2, u3 = config['DBSession'].query(User.id, User.name).limit(3)
+        u1, u2, u3 = config['DBSession'].query(User.id, User.name).filter(User.id > 1).limit(3)
         
         with transaction.manager:
             p1 = db.get_profile(user_id=u1.id)
@@ -114,10 +113,10 @@ class DBTester(DBTestClass):
         )
         
         # Matchmaking
-        self.make_request(app, "/odummo/matchmake", cookies,
-            msg="Error attempting to matchmake",
-            expect_forward = re.compile(r"odummo/game/[0-9]+")
-        )
+        # self.make_request(app, "/odummo/matchmake", cookies,
+        #     msg="Error attempting to matchmake",
+        #     expect_forward = re.compile(r"odummo/game/[0-9]+")
+        # )
         
         # Stats
         self.make_request(app, "/odummo/stats", cookies, msg="Error attempting to view stats")
@@ -135,11 +134,11 @@ class DBTester(DBTestClass):
         page_result = self.make_request(app, "/odummo/new_game", cookies,
             msg="Error loading the new game screen")
         
-        form = page_result.form  
-        form.set("opponent_name1", u2.name)
+        form = page_result.form
+        form.set("opponent_name", u2.name)
         page_result = form.submit('form.submitted')
         
-        self.check_request_result(
+        page_result = self.check_request_result(
             page_result,
             "",
             {},
@@ -148,29 +147,18 @@ class DBTester(DBTestClass):
         )
         
         # Get match ID
-        the_game = config['DBSession'].query(WordyGame).order_by(WordyGame.id.desc()).first()
+        the_game = config['DBSession'].query(OdummoGame).order_by(OdummoGame.id.desc()).first()
         
         # View game
-        page_result = self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
+        self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
             msg="Error viewing the game"
         )
         
         # Make a move
-        with transaction.manager:
-            the_game.tiles = ("FLATBCD", "URNABCD")
-        
-        form = None
-        for k, f in page_result.forms.items():
-            if f.id == "move_maker_form":
-                form = f
-        
-        if form is None:
-            self.fail("Could not find the move_maker_form when trying to make a move")
-        
-        form.set("letter0", "F_7_7")
-        form.set("letter1", "L_8_7")
-        form.set("letter2", "A_9_7")
-        form.set("letter3", "T_10_7")
+        """
+        page_result = self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
+            msg="Error viewing the game"
+        )
         
         page_result = form.submit('form.submitted')
         
@@ -189,57 +177,4 @@ class DBTester(DBTestClass):
         # View once more now the game has ended
         
         self.make_request(app, "/odummo/menu", cookies, msg="Error loading the menu screen for odummo after ensuring games were added")
-    
-    def test_win_in_depth(self):
-        """I was getting reports the win conditions were not being accurately tracked."""
-        
-        with transaction.manager:
-            config['DBSession'].execute('DELETE FROM odummo_moves')
-            config['DBSession'].execute('DELETE FROM odummo_games')
-            config['DBSession'].execute('COMMIT')
-        
-        User = config['User']
-        u1, u2 = config['DBSession'].query(User.id, User.name).limit(2)
-        
-        app, cookies = self.get_app()
-        
-        # Now lets start a game
-        db.new_game(players=[u1.id, u2.id], rematch=None)
-        
-        # Get match ID
-        the_game = config['DBSession'].query(WordyGame).order_by(WordyGame.id.desc()).first()
-        
-        def _get_moves():
-            return config['DBSession'].query(WordyMove).filter(WordyMove.game == the_game.id)
-        
-        # Make a move
-        the_game.tiles = ["FLATBCD", "LOATSMZ"]
-        db.perform_move(the_game, u1.id, (
-            ("F", 7, 7),
-            ("L", 8, 7),
-            ("A", 9, 7),
-            ("T", 10, 7),
-        ))
-        
-        the_game.tiles = ["FLATBCD", "LOATSMZ"]
-        db.perform_move(the_game, u2.id, (
-            ("L", 7, 8),
-            ("O", 7, 9),
-            ("A", 7, 10),
-            ("T", 7, 11),
-            ("S", 7, 12),
-            ("M", 7, 13),
-        ))
-        
-        the_game.tiles = ["FLATBCD", "LOATSMZ"]
-        db.perform_move(the_game, u1.id, (
-            ("A", 8, 13),
-            ("D", 9, 13),
-        ))
-        
-        the_game.tiles = ["FLATBCD", "LOATSMZ"]
-        with_count = dict(rules.tally_scores(the_game, _get_moves(), count_tiles=True))
-        without_count = dict(rules.tally_scores(the_game, _get_moves(), count_tiles=False))
-        
-        self.assertEqual(with_count, {u1.id:35, u2.id:28})
-        self.assertEqual(without_count, {u1.id:17, u2.id:13})
+        """

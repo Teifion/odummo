@@ -56,6 +56,7 @@ def new_game(request):
         the_user     = the_user,
         message      = message,
         flash_colour = flash_colour,
+        profile      = db.get_profile(the_user.id),
     )
 
 def view_game(request):

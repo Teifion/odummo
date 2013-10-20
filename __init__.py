@@ -7,10 +7,10 @@ def odummo_nimblescan():
         except ImportError:
             return
     
-    api.register('odummo.menu', "Connect 4 - Menu", ['games'], (lambda r: True), api.make_forwarder("odummo.menu"))
-    api.register('odummo.new_game', "Connect 4 - New game", ['games'], (lambda r: True), api.make_form_forwarder("odummo.new_game", []), '<label for="ns_opponent">Opponent:</label> <input type="text" name="opponent_name" id="ns_opponent" value="" style="display:inline-block;"/>')
-    api.register('odummo.stats', "Connect 4 - Stats", ['games'], (lambda r: True), api.make_forwarder("odummo.stats"))
-    api.register('odummo.preferences', "Connect 4 - Preferences", ['games'], (lambda r: True), api.make_forwarder("odummo.preferences"))
+    api.register('odummo.menu', "Odummo - Menu", ['games'], (lambda r: True), api.make_forwarder("odummo.menu"))
+    api.register('odummo.new_game', "Odummo - New game", ['games'], (lambda r: True), api.make_form_forwarder("odummo.new_game", []), '<label for="ns_opponent">Opponent:</label> <input type="text" name="opponent_name" id="ns_opponent" value="" style="display:inline-block;"/>')
+    api.register('odummo.stats', "Odummo - Stats", ['games'], (lambda r: True), api.make_forwarder("odummo.stats"))
+    api.register('odummo.preferences', "Odummo - Preferences", ['games'], (lambda r: True), api.make_forwarder("odummo.preferences"))
 
 def odummo_notifications():
     try:

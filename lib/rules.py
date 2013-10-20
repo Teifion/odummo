@@ -43,3 +43,8 @@ def is_move_valid(current_state, turn, square):
 
 def check_for_win(the_game):
     return False
+
+def win_ratio(wins, total_games, decimal_points=2):
+    if total_games == 0: return 0
+    if wins == 0: return 0
+    return round(100 * (wins / total_games), decimal_points)

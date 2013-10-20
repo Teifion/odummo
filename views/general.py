@@ -37,7 +37,20 @@ def menu(request):
     )
 
 def stats(request):
-    pass
+    config['check_blocked'](request)
+    the_user = config['get_user_func'](request)
+    db.get_profile(the_user.id)
+    layout = get_renderer(config['layout']).implementation()
+    
+    stats = db.get_stats(the_user.id)
+    
+    return dict(
+        title    = "Odummo stats",
+        layout   = layout,
+        the_user = the_user,
+        
+        stats    = stats,
+    )
 
 def preferences(request):
     config['check_blocked'](request)
@@ -70,7 +83,46 @@ def preferences(request):
     )
 
 def head_to_head_stats(request):
-    pass
+    config['check_blocked'](request)
+    the_user = config['get_user_func'](request)
+    message  = ""
+    
+    if "opponent_name" in request.params:
+        opponent_name = request.params['opponent_name'].strip().upper()
+        opponent = db.find_user(opponent_name)
+        
+    else:
+        opponent_id = int(request.params['opponent_id'])
+        opponent = db.find_user(opponent_id)
+    
+    stats = None
+        
+    if opponent is not None:
+        stats = db.get_stats(the_user.id, opponent.id)
+    else:
+        message = "No opponent could be found"
+    
+    return dict(
+        stats    = stats,
+        message  = message,
+        opponent = opponent,
+    )
 
 def matchmake(request):
-    pass
+    config['check_blocked'](request)
+    layout = get_renderer(config['layout']).implementation()
+    
+    the_user = config['get_user_func'](request)
+    profile = db.get_profile(the_user.id)
+    
+    result = db.find_match(profile)
+    
+    if isinstance(result, str):
+        return dict(
+            title    = "Wordy matchmaking",
+            layout   = layout,
+            message  = result,
+        )
+    
+    game_id = db.new_game([the_user.id, result])
+    return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
