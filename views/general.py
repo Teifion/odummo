@@ -75,7 +75,7 @@ def preferences(request):
         message = "Changes saved"
     
     return dict(
-        title    = "Ultimate O's and X's preferences",
+        title    = "Odummo preferences",
         layout   = layout,
         the_user = the_user,
         profile  = profile,

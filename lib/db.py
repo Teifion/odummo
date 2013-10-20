@@ -104,6 +104,10 @@ def find_user(identifier):
         raise KeyError("No handler for identifier type of '{}'".format(type(identifier)))
 
 def new_game(p1, p2, rematch=None):
+    # 50% chance for either player to be player 1
+    if random() > 0.5:
+        p1, p2 = p2, p1
+    
     game               = OdummoGame()
     game.player1       = p1.id
     game.player2       = p2.id
@@ -113,10 +117,6 @@ def new_game(p1, p2, rematch=None):
     
     game.current_state = str(rules.empty_board)
     game.active_board  = -1
-    
-    # 50% chance for either player to be player 1
-    if random() > 0.5:
-        game.player1, game.player2 = game.player2, game.player1
     
     config['DBSession'].add(game)
     
@@ -137,9 +137,8 @@ def get_game(game_id):
     return the_game
 
 def perform_move(the_game, square):
-    board = list(the_game.current_state)
-    board[square] = str((the_game.turn % 2) + 1)
-    the_game.current_state = "".join(board)
+    new_state = rules.new_board(the_game.current_state, the_game.turn, square)
+    the_game.current_state = new_state
     
     add_turn(the_game, square)
     the_game.turn += 1

@@ -71,9 +71,11 @@ def view_game(request):
     
     if the_game.player1 == the_user.id:
         opponent = db.find_user(the_game.player2)
+        the_board = rules.set_state_by_colour(the_game.current_state, profile.preferred_colour, player_is_player1=True)
         
     else:
-        opponent = db.find_user(the_game.player2)
+        opponent = db.find_user(the_game.player1)
+        the_board = rules.set_state_by_colour(the_game.current_state, profile.preferred_colour, player_is_player1=False)
     
     winner = None
     if the_game.winner != None:
@@ -85,6 +87,7 @@ def view_game(request):
         the_user  = the_user,
         the_game  = the_game,
         your_turn = rules.current_player(the_game) == the_user.id,
+        the_board = the_board,
         profile   = profile,
         winner    = winner,
         message   = message,
@@ -110,6 +113,7 @@ def make_move(request):
         
         if valid_move == "Valid":
             db.perform_move(the_game, square)
+            
             # com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))
             return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
         else:

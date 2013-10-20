@@ -169,7 +169,7 @@
         </div>
         
         <div id="the_game">
-            <div class="square" tal:repeat="(i, s) enumerate(the_game.current_state)">
+            <div class="square" tal:repeat="(i, s) enumerate(the_board)">
                 <a class="empty" tal:condition="s == ' '" href="${request.route_url('odummo.make_move', game_id=the_game.id)}?square=${i}">
                     &nbsp;
                 </a>
@@ -184,10 +184,10 @@
                 </div>
                 
                 <div tal:condition="not profile.preferred_colour">
-                    <div class="player1" tal:condition="s == '1'">
+                    <div class="player2" tal:condition="s == '1'">
                         &nbsp;
                     </div>
-                    <div class="player2" tal:condition="s == '2'">
+                    <div class="player1" tal:condition="s == '2'">
                         &nbsp;
                     </div>
                 </div>
