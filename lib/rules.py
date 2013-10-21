@@ -127,7 +127,6 @@ def is_move_valid(current_state, turn, square_id):
     if len(flips) < 1:
         return "You must flip at least one piece to be able to claim a square"
     
-    # return "Should be valid"
     return "Valid"
 
 def set_state_by_colour(current_state, preferred_colour, player_is_player1):
@@ -170,7 +169,31 @@ def new_board(current_state, turn, square_id):
     return flatten_board(board)
 
 def check_for_win(the_game):
-    return False
+    check_move = lambda s: "Valid" == is_move_valid(the_game.current_state, the_game.turn, s)
+    
+    valid_move_found = False
+    for square, content in enumerate(the_game.current_state):
+        if valid_move_found: continue
+        if content == ' ':
+            valid_move_found = check_move(square)
+    
+    # If a valid move has been found we can't declare a winner!
+    if valid_move_found:
+        return False
+    
+    player1 = len(list(filter(
+        lambda t: t == "1",
+        the_game.current_state
+    )))
+    
+    player2 = len(list(filter(
+        lambda t: t == "2",
+        the_game.current_state
+    )))
+    
+    if player1 > player2: return "1"
+    if player1 < player2: return "2"
+    return "Draw"
 
 def win_ratio(wins, total_games, decimal_points=2):
     if total_games == 0: return 0

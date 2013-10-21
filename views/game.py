@@ -47,7 +47,7 @@ def new_game(request):
             message = """I'm sorry, we cannot find any opponent by the name of '{}'""".format(opponent_name)
             
         else:
-            game_id = db.new_game(the_user, opponent)
+            game_id = db.new_game(the_user.id, opponent.id)
             return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
     
     return dict(
@@ -107,6 +107,10 @@ def make_move(request):
     
     the_game = db.get_game(game_id)
     current_player = rules.current_player(the_game)
+    
+    # If someone has already won then send them back to the game itself
+    if the_game.winner != None:
+        return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
     
     if current_player == the_user.id:
         valid_move = rules.is_move_valid(the_game.current_state, the_game.turn, square)

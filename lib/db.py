@@ -16,7 +16,7 @@ from ..models import (
 
 from sqlalchemy import or_, not_, and_
 from sqlalchemy import func
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from . import (
     rules,
@@ -109,8 +109,8 @@ def new_game(p1, p2, rematch=None):
         p1, p2 = p2, p1
     
     game               = OdummoGame()
-    game.player1       = p1.id
-    game.player2       = p2.id
+    game.player1       = p1
+    game.player2       = p2
     game.started       = datetime.now()
     game.turn          = 0
     game.source        = rematch
@@ -122,8 +122,8 @@ def new_game(p1, p2, rematch=None):
     
     # Get game ID
     game_id = config['DBSession'].query(OdummoGame.id).filter(
-        OdummoGame.player1 == p1.id,
-        OdummoGame.player2 == p2.id,
+        OdummoGame.player1 == p1,
+        OdummoGame.player2 == p2,
     ).order_by(OdummoGame.id.desc()).first()[0]
     
     return game_id
@@ -145,10 +145,14 @@ def perform_move(the_game, square):
     
     end_result = rules.check_for_win(the_game)
     
-    if end_result in ("1", "2"):
-        end_game(the_game)
-    elif " " not in the_game.current_state:
-        draw_game(the_game)
+    if end_result == "1":
+        the_game.winner = the_game.player1
+        
+    elif end_result == "2":
+        the_game.winner = the_game.player2
+        
+    elif " " not in the_game.current_state or end_result == "Draw":
+        the_game.winner = -1
     
     config['DBSession'].add(the_game)
 
@@ -163,8 +167,6 @@ def add_turn(the_game, square):
     config['DBSession'].add(new_turn)
 
 def find_match(profile):
-    return "Not complete yet"
-    
     """
     We want to find:
      - Someone we're not currently playing against
@@ -175,29 +177,32 @@ def find_match(profile):
     
     # First we find who we are currently playing against
     filters = (
-        "{:d} = ANY(wordy_games.players)".format(profile.user),
-        WordyGame.winner == None,
+        or_(
+            OdummoGame.player1 == profile.user,
+            OdummoGame.player2 == profile.user,
+        ),
+        OdummoGame.winner == None,
     )
     
     current_opponents = [profile.user]
-    for game in config['DBSession'].query(WordyGame.players).filter(*filters):
-        current_opponents.extend(game[0])
+    for p1, p2 in config['DBSession'].query(OdummoGame.player1, OdummoGame.player2).filter(*filters):
+        current_opponents.extend([p1, p2])
     current_opponents = set(current_opponents)
     
     # Two days ago
-    last_allowed_move = datetime.datetime.now() - datetime.timedelta(days=2)
+    last_allowed_move = datetime.now() - timedelta(days=2)
     
     # Our winloss ratio
     winloss = profile.wins/max(profile.losses,1)
     
     # Order by
-    ordering = "ABS((wordy_profiles.wins/GREATEST(wordy_profiles.losses,1)) - {}) ASC".format(winloss)
+    ordering = "ABS((odummo_profiles.wins/GREATEST(odummo_profiles.losses,1)) - {}) ASC".format(winloss)
     
     # The query that tries to find our opponent
-    opponent = config['DBSession'].query(WordyProfile.user).filter(
-        not_(WordyProfile.user.in_(current_opponents)),
-        WordyProfile.matchmaking == True,
-        WordyProfile.last_move > last_allowed_move,
+    opponent = config['DBSession'].query(OdummoProfile.user).filter(
+        not_(OdummoProfile.user.in_(current_opponents)),
+        OdummoProfile.matchmaking == True,
+        OdummoProfile.last_move > last_allowed_move,
     ).order_by(ordering).first()
     
     if opponent is None:

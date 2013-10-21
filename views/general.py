@@ -3,6 +3,7 @@ Views related to the system that don't involve playing the game itself.
 """
 
 from pyramid.renderers import get_renderer
+from pyramid.httpexceptions import HTTPFound
 
 from ..lib import (
     db,
@@ -119,10 +120,10 @@ def matchmake(request):
     
     if isinstance(result, str):
         return dict(
-            title    = "Wordy matchmaking",
+            title    = "Odummo matchmaking",
             layout   = layout,
             message  = result,
         )
     
-    game_id = db.new_game([the_user.id, result])
+    game_id = db.new_game(the_user.id, result)
     return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
