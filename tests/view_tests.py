@@ -7,6 +7,7 @@ from ..lib import (
 )
 
 import re
+import random
 from pyramid import testing
 from pyramid.httpexceptions import HTTPFound
 
@@ -70,6 +71,9 @@ class OdummoDBTester(DBTestClass):
 #     return view(request)
     
     def test_views(self):
+        # We use this to ensure it's never our turn first
+        random.seed(500)
+        
         with transaction.manager:
             config['DBSession'].execute('DELETE FROM odummo_moves')
             config['DBSession'].execute('DELETE FROM odummo_games')
@@ -113,10 +117,10 @@ class OdummoDBTester(DBTestClass):
         )
         
         # Matchmaking
-        # self.make_request(app, "/odummo/matchmake", cookies,
-        #     msg="Error attempting to matchmake",
-        #     expect_forward = re.compile(r"odummo/game/[0-9]+")
-        # )
+        self.make_request(app, "/odummo/matchmake", cookies,
+            msg="Error attempting to matchmake",
+            expect_forward = re.compile(r"odummo/game/[0-9]+")
+        )
         
         # Stats
         self.make_request(app, "/odummo/stats", cookies, msg="Error attempting to view stats")
@@ -148,22 +152,52 @@ class OdummoDBTester(DBTestClass):
         
         # Get match ID
         the_game = config['DBSession'].query(OdummoGame).order_by(OdummoGame.id.desc()).first()
+        game_id = the_game.id
         
         # View game
-        self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
+        self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
             msg="Error viewing the game"
+        )
+        
+        # Make a move, this one should fail as it's not our turn
+        page_result = self.make_request(app, "/odummo/make_move/{}?square=0".format(game_id), cookies,
+            msg="Error making a bad move (Not our turn)"
+        )
+        self.assertIn("It is not your turn", str(page_result))
+        
+        # We now make it our turn
+        with transaction.manager:
+            the_game.turn += 1
+            config['DBSession'].add(the_game)
+        
+        # Make a move, this one should fail as it's not next to a tile
+        page_result = self.make_request(app, "/odummo/make_move/{}?square=0".format(game_id), cookies,
+            msg="Error making a bad move (Not next to any other tiles)"
+        )
+        self.assertIn("You must place your tile next to at least one other tile", str(page_result))
+        
+        # Make a move, this one should fail as it's not next to a tile
+        page_result = self.make_request(app, "/odummo/make_move/{}?square=18".format(game_id), cookies,
+            msg="Error making a bad move (No tiles will get flipped)"
+        )
+        self.assertIn("You must flip at least one piece to be able to claim a square", str(page_result))
+        
+        # Make a move, this one should work
+        self.make_request(app, "/odummo/make_move/{}?square=19".format(game_id), cookies,
+            msg="Error making a bad move (No tiles will get flipped)",
+            expect_forward = "/odummo/game/{}".format(game_id)
         )
         
         # Make a move
         """
-        page_result = self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
+        page_result = self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
             msg="Error viewing the game"
         )
         
         page_result = form.submit('form.submitted')
         
         # View it again to make sure it's still okay to view a game
-        page_result = self.make_request(app, "/odummo/game/{}".format(the_game.id), cookies,
+        page_result = self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
             msg="Error viewing the game"
         )
         
