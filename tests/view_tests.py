@@ -55,20 +55,12 @@ This assumes the path prefix is "odummo".
 """
 
 class OdummoDBTester(DBTestClass):
-    def ttest_notifications(self):
+    def test_notifications(self):
         r = testing.DummyRequest()
         
         # We don't test the validity, just that they'll work if we pass them data
         result = notifications.forward_to_game(r, "1")
         self.assertTrue(isinstance(result, HTTPFound))
-
-# def make_view(self, app, view, matchdict={}, params={}, msg="", request=None):
-#     if request is None:
-#         request = DummyRequest()
-    
-#     request.matchdict = matchdict
-#     request.params = params
-#     return view(request)
     
     def test_views(self):
         # We use this to ensure it's never our turn first
@@ -169,6 +161,7 @@ class OdummoDBTester(DBTestClass):
         with transaction.manager:
             the_game.turn += 1
             config['DBSession'].add(the_game)
+        del(the_game)
         
         # Make a move, this one should fail as it's not next to a tile
         page_result = self.make_request(app, "/odummo/make_move/{}?square=0".format(game_id), cookies,
@@ -188,27 +181,32 @@ class OdummoDBTester(DBTestClass):
             expect_forward = "/odummo/game/{}".format(game_id)
         )
         
-        # Make a move
-        """
-        page_result = self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
-            msg="Error viewing the game"
+        # Now lets check for win conditions
+        the_game = config['DBSession'].query(OdummoGame).filter(OdummoGame.id == game_id).first()
+        with transaction.manager:
+            the_game.turn += 1
+            # Top left square is empty, bottom right is the same as us
+            the_game.current_state = " " + ("1"*62) + "2"
+            config['DBSession'].add(the_game)
+            del(the_game)
+        
+        # End the game!
+        self.make_request(app, "/odummo/make_move/{}?square=0".format(game_id), cookies,
+            msg="Error making a final move",
+            expect_forward = "/odummo/game/{}".format(game_id)
         )
         
-        page_result = form.submit('form.submitted')
+        the_game = config['DBSession'].query(OdummoGame).filter(OdummoGame.id == game_id).first()
+        self.assertEqual(the_game.current_state,
+                "2111111112111111112111111112111111112111111112111111112111111112",
+                msg="Winning move not correctly saved")
         
-        # View it again to make sure it's still okay to view a game
-        page_result = self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
-            msg="Error viewing the game"
+        self.assertEqual(the_game.winner, the_game.player1)
+        
+        # Try to view it again anyway
+        self.make_request(app, "/odummo/game/{}".format(game_id), cookies,
+            msg="Error viewing the game once completed"
         )
         
-        # config.add_route('odummo.rematch', '/rematch/{game_id}')
-        # config.add_route('odummo.view_game', '/game/{game_id}')
-        # config.add_route('odummo.check_status', '/check_status/{game_id}')
-        # config.add_route('odummo.check_turn', '/check_turn/{game_id}')
-        # config.add_route('odummo.make_move', '/make_move/{game_id}')
-        # config.add_route('odummo.test_move', '/test_move/{game_id}')
-        
-        # View once more now the game has ended
-        
-        self.make_request(app, "/odummo/menu", cookies, msg="Error loading the menu screen for odummo after ensuring games were added")
-        """
+        self.fail("Rematch is not yet tested")
+        self.fail("Check turn is not yet tested")

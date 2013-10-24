@@ -114,9 +114,9 @@ def is_move_valid(current_state, turn, square_id):
     
     # Ensure we are placing our tile next to at least one other tiles
     surrounding_squares = (
-        board[(sy-1, sx-1)], board[(sy-1, sx)], board[(sy-1, sx+1)],
-        board[(sy-0, sx-1)],                    board[(sy-0, sx+1)],
-        board[(sy+1, sx-1)], board[(sy+1, sx)], board[(sy+1, sx+1)],
+        board[(sx-1, sy-1)], board[(sx-1, sy)], board[(sx-1, sy+1)],
+        board[(sx-0, sy-1)],                    board[(sx-0, sy+1)],
+        board[(sx+1, sy-1)], board[(sx+1, sy)], board[(sx+1, sy+1)],
     )
     
     if '1' not in surrounding_squares and '2' not in surrounding_squares:

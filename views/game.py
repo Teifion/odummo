@@ -118,7 +118,7 @@ def make_move(request):
         if valid_move == "Valid":
             db.perform_move(the_game, square)
             
-            # com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))
+            com_send(rules.current_player(the_game), "odummo.new_move", "{} has made a move".format(the_user.name), str(game_id), timedelta(hours=24))
             return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
         else:
             message = valid_move
@@ -159,18 +159,6 @@ def rematch(request):
     
     # com_send(opponent.id, "odummo.new_game", "{} has started a game against you".format(the_user.name), str(newgame_id), timedelta(hours=24))
     return HTTPFound(location=request.route_url("odummo.view_game", game_id=newgame_id))
-
-def check_turn(request):
-    config['check_blocked'](request)
-    request.do_not_log = True
-    
-    the_user = config['get_user_func'](request)
-    game_id  = int(request.matchdict['game_id'])
-    
-    the_game = db.get_game(game_id)
-    if rules.current_player(the_game) == the_user.id:
-        return "True"
-    return "False"
 
 def check_turn(request):
     config['check_blocked'](request)
