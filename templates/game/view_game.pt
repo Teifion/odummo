@@ -37,7 +37,7 @@
             display: block;
         }
         
-        .empty
+        .empty, .square .player1, .square .player2
         {
             padding: 0;
             margin: 0;
@@ -51,7 +51,7 @@
         
         .square .player1, .square .player2
         {
-            background-image: url('${request.static_url('dashboard:static/games/odummo/pieces.png')}');
+            border: 0px solid #FFF;
             background-repeat: no-repeat;
             width: 100px;
             height: 100px;
@@ -59,14 +59,14 @@
         
         .square .player1
         {
-            background-color: #000;
-            background-position: 1px 1px;
+            background-image: url('${request.static_url('dashboard:static/games/odummo/black.png')}');
+            background-position: 0px 0px;
         }
         
         .square .player2
         {
-            background-color: #FFF;
-            background-position: 0px -103px;
+            background-image: url('${request.static_url('dashboard:static/games/odummo/white.png')}');
+            background-position: 0px 0px;
         }
         
         .dropper .inbutton
