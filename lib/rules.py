@@ -147,7 +147,6 @@ def set_state_by_colour(current_state, preferred_colour, player_is_player1):
     
     return current_state
 
-
 def new_board(current_state, turn, square_id):
     """Takes a board, current turn and a move
     Returns a flattened board of the new state"""
