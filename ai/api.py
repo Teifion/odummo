@@ -2,9 +2,18 @@
 A set of functions allowing you to run games from a CLI script.
 """
 
-from ai import cli_f
 from collections import namedtuple
-from lib import rules
+import argparse
+
+try:
+    from ai import cli_f
+    from lib import rules
+except ValueError:
+    from . import cli_f
+    from ..lib import rules
+except ImportError:
+    from . import cli_f
+    from ..lib import rules
 
 BoardObject = namedtuple('BoardObject', ['current_state', 'turn'])
 PotentialMove = namedtuple('PotentialMove', ['square', 'flips'])
@@ -25,21 +34,24 @@ def make_move(current_state, player, square):
     if isinstance(square, tuple):
         square = _tuple_to_square_id(square)
     
+    if is_move_valid(current_state, player+1, square) != "Valid":
+        raise Exception("Invalid move")
+    
     new_state = rules.new_board(current_state, turn=player+1, square_id=square)
     end_result = rules.check_for_win(BoardObject(new_state, player+1))
     
     return new_state, end_result
 
-def all_moves(current_state, player):
+def all_potential_moves(current_state, player):
     squares = range(64)
-    prelude = lambda square: PotentialMove(square, rules.get_flips(current_state, turn=player+1, square_id=square))
+    prelude = lambda square: PotentialMove(square, rules.get_flips(current_state, turn=player, square_id=square))
     
-    return map(prelude, squares)
-
-def all_valid_moves(current_state, player):
-    return filter(
-        lambda pm: len(pm.flips) > 0,
-        all_moves(current_state, player),
+    return map(
+        prelude,
+        filter(
+            lambda square: rules.is_move_valid(current_state, player, square) == "Valid",
+            squares,
+        )
     )
 
 def visual_board(b):
@@ -65,48 +77,44 @@ def run_game(step1, step2):
     player = 1
     while not game_over:
         square = steps[player](b, player)
+        
         moves.append((player, square))
-        b, end = make_move(b, player, square)
+        new_board, end = make_move(b, player, square)
         
         if end:
             game_over = True
+        
+        b = str(new_board)
         
         # Oscillate between 1 and 2
         player = (3 - player)
     
     return moves, b
 
-from random import choice
-def random_step(b, player):
-    valid = list(all_valid_moves(b, player))
-    return choice(valid).square
-
-def most_flips(b, player):
-    valid = all_valid_moves(b, player)
-    most = PotentialMove(-1, [])
+def run_many_games(game_count, ai1, ai2):
+    """
+    Each ai is expected to implement 3 functions:
     
-    for v in valid:
-        if most is None or len(v.flips) > len(most.flips):
-            most = v
+    initialise() - No arguments, called before a series of games takes place
     
-    return most.square
-
-def main():
-    scores = [0,0]
+    step(board, player) - Given a copy of the board and their player number
+        expected to return the square to play
     
-    for i in cli_f.progressbar(range(100), "Running matches: ", 40, with_eta=True):
-        moves, board = run_game(random_step, most_flips)
+    game_over(moves, board, player) - Given a copy of the moves made, the final board result and their player number
+    
+    shutdown() - No arguments, called at the end of a series (to allow things like comits etc)
+    """
+    
+    ai1.initialise()
+    ai2.initialise()
+    
+    for i in range(game_count):
+        moves, board = run_game(ai1.step, ai2.step)
         
-        p1 = len(list(filter((lambda s: s == '1'), board)))
-        p2 = len(list(filter((lambda s: s == '2'), board)))
+        ai1.game_over(moves, board, '1')
+        ai2.game_over(moves, board, '2')
         
-        if p1 > p2:
-            scores[0] += 1
-        else:
-            scores[1] += 1
-        
-    print("Player 1 (random_step): %s/100" % scores[0])
-    print("Player 2 (most_flips): %s/100" % scores[1])
-
-if __name__ == '__main__':
-    main()
+        yield moves, board
+    
+    ai1.shutdown()
+    ai2.shutdown()

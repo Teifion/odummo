@@ -3,6 +3,7 @@ This module contains all functions relating to the rules of a game, but not
 nessesarily the running of a game itself.
 """
 
+import math
 from itertools import takewhile
 from collections import defaultdict
 

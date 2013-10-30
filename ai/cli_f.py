@@ -28,13 +28,15 @@ class TimeoutFunction:
         signal.alarm(0)
         return result
 
-def progressbar(it, prefix = "", size = 60, with_eta=False):
+def progressbar(it, prefix = "", size = 60, with_eta=False, count=None):
     """
     for i in progressbar(range(15), "Computing: ", 40):
          time.sleep(0.1) # long computation
     """
     
-    count = len(it)
+    if count is None:
+        count = len(it)
+    
     start_time = time.time()
     
     def _show(_i):
