@@ -35,10 +35,10 @@ def make_move(current_state, player, square):
         square = _tuple_to_square_id(square)
     
     if is_move_valid(current_state, player, square) != "Valid":
-        raise Exception("Invalid move")
+        raise Exception("Invalid move by %s" % player)
     
     new_state = rules.new_board(current_state, turn=player, square_id=square)
-    end_result = rules.check_for_win(BoardObject(new_state, player))
+    end_result = rules.check_for_win(BoardObject(new_state, player+1))
     
     return new_state, end_result
 
@@ -55,9 +55,10 @@ def all_potential_moves(current_state, player):
     )
 
 def visual_board(b):
-    r = []
+    r = [" " + "-"*8]
     for i in range(8):
-        r.append(b[i*8:(i+1)*8])
+        r.append('|' + b[i*8:(i+1)*8] + '|')
+    r.append(" " + "-"*8)
     return "\n".join(r)
 
 def run_game(step1, step2):
@@ -68,18 +69,29 @@ def run_game(step1, step2):
     and the final result of the game."""
     
     # We use this to avoid an if statement later
-    steps = [None, step1, step2]
+    steps = [None, step2, step1]
     
     b = new_game()
     moves = []
     
     game_over = False
-    player = 1
+    player = 2
     while not game_over:
-        square = steps[player](b, player)
+        try:
+            square = steps[player](b, player)
+        except Exception:
+            print("Board: '%s'" % b)
+            print("Player: %s" % player)
+            print("\n\n")
+            raise
         
         moves.append((player, square))
         new_board, end = make_move(b, player, square)
+        
+        # print("")
+        # print("Player %s moved to %s" % (3-player, square))
+        # print(visual_board(new_board))
+        # print("")
         
         if end:
             game_over = True

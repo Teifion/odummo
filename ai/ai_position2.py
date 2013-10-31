@@ -3,11 +3,10 @@ from functools import reduce
 from . import api
 
 """
-A simple AI that attempts to value corners and sides higher but otherwise
-move based on the number of flips it will perform.
+This is an AI designed to lose every time or close to it.
 """
 
-name = "Position"
+name = "Position 2"
 
 _corners = 20
 _sides = 10
@@ -30,7 +29,7 @@ def initialise():
 
 def step(b, player):
     moves = api.all_potential_moves(b, player)
-    prelude = lambda a, b: a if _value(a) > _value(b) else b
+    prelude = lambda a, b: a if _value(a) < _value(b) else b
     return reduce(prelude, moves).square
 
 def game_over(moves, board, player):
