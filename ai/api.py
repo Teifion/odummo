@@ -28,17 +28,17 @@ def is_move_valid(current_state, player, square):
     if isinstance(square, tuple):
         square = _tuple_to_square_id(square)
     
-    return rules.is_move_valid(current_state, turn=player+1, square_id=square)
+    return rules.is_move_valid(current_state, turn=player, square_id=square)
 
 def make_move(current_state, player, square):
     if isinstance(square, tuple):
         square = _tuple_to_square_id(square)
     
-    if is_move_valid(current_state, player+1, square) != "Valid":
+    if is_move_valid(current_state, player, square) != "Valid":
         raise Exception("Invalid move")
     
-    new_state = rules.new_board(current_state, turn=player+1, square_id=square)
-    end_result = rules.check_for_win(BoardObject(new_state, player+1))
+    new_state = rules.new_board(current_state, turn=player, square_id=square)
+    end_result = rules.check_for_win(BoardObject(new_state, player))
     
     return new_state, end_result
 
