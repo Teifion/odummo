@@ -12,6 +12,7 @@ name = "Position"
 _corners = 20
 _sides = 10
 _normal = 0
+_bad = -10
 
 def _value(possible_move):
     sx = possible_move.square % 8
@@ -22,6 +23,9 @@ def _value(possible_move):
     
     if sx in (0,7) or sy in (0,7):
         return _sides + len(possible_move.flips)
+    
+    if sx in (1,6) or sy in (1,6):
+        return _bad + len(possible_move.flips)
     
     return _normal + len(possible_move.flips)
 

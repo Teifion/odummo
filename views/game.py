@@ -106,8 +106,6 @@ def view_game(request):
     if opponent.id == -1:
         opponent.name = "Odummo AI"
     
-    
-    
     return dict(
         title     = "Odummo: {}".format(opponent.name),
         layout    = layout,
@@ -119,6 +117,7 @@ def view_game(request):
         winner    = winner,
         message   = message,
         opponent  = opponent,
+        vs_ai     = -1 in (the_game.player1, the_game.player2),
     )
 
 def make_move(request):
