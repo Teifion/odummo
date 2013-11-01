@@ -3,8 +3,7 @@ Views relating to games of Odummo.
 """
 
 import transaction
-import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
@@ -59,6 +58,25 @@ def new_game(request):
         profile      = db.get_profile(the_user.id),
     )
 
+def new_ai_game(request):
+    config['check_blocked'](request)
+    the_user = config['get_user_func'](request)
+    layout = get_renderer(config['layout']).implementation()
+    
+    existing_game = db.find_ongoing_ai_game(the_user.id)
+    
+    if existing_game == None:
+        game_id = db.new_ai_game(the_user.id)
+        return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
+    
+    return dict(
+        title         = "Odummo",
+        layout        = layout,
+        the_user      = the_user,
+        existing_game = existing_game,
+        profile       = db.get_profile(the_user.id),
+    )
+
 def view_game(request):
     config['check_blocked'](request)
     the_user = config['get_user_func'](request)
@@ -68,6 +86,10 @@ def view_game(request):
     game_id  = int(request.matchdict['game_id'])
     the_game = db.get_game(game_id)
     message  = ""
+    
+    # Is it an AI game?
+    if db.is_it_ai_move(the_game):
+        return HTTPFound(location=request.route_url("odummo.ai_move", game_id=game_id))
     
     if the_game.player1 == the_user.id:
         opponent = db.find_user(the_game.player2)
@@ -80,6 +102,11 @@ def view_game(request):
     winner = None
     if the_game.winner != None:
         winner = db.find_user(the_game.winner)
+    
+    if opponent.id == -1:
+        opponent.name = "Odummo AI"
+    
+    
     
     return dict(
         title     = "Odummo: {}".format(opponent.name),
@@ -171,3 +198,13 @@ def check_turn(request):
     if rules.current_player(the_game) == the_user.id:
         return "True"
     return "False"
+
+def ai_move(request):
+    game_id  = int(request.matchdict['game_id'])
+    the_game = db.get_game(game_id)
+    
+    if rules.current_player(the_game) == -1:
+        if db.is_it_ai_move(the_game):
+            db.make_ai_move(the_game)
+    
+    return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))

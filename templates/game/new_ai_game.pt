@@ -1,0 +1,28 @@
+<div metal:use-macro="layout">
+    <style type="text/css" media="screen" metal:fill-slot="css">
+        
+    </style>
+    <div metal:fill-slot="header_buttons" style="display:inline-block;">
+        <a class="inbutton homebutton" href="${request.route_url('odummo.menu')}">Odummo menu</a>
+    </div>
+    <div metal:fill-slot="content">
+        <div id="flash_update" style="border: 1px solid #AAA; margin:10px; padding:10px; text-align:center;">
+            You can only have one ongoing game against the AI at a time.
+            
+            <script type="text/javascript" charset="utf-8">
+                $(document).ready(function() {
+                    $('#flash_update').show();
+                    $('#flash_update').animate({backgroundColor: "#C33"}, 500);
+                    $('#flash_update').animate({backgroundColor: "#FFF"}, 1500);
+                });
+            </script>
+        </div>
+        <br /><br />
+        
+        <a href="${request.route_url('odummo.view_game', game_id=existing_game.id)}" class="button">View my game against the AI</a>
+    </div>
+    
+    <div metal:fill-slot="footer">
+        Open source - <a href="http://github.com/teifion/odummo">http://github.com/teifion/odummo</a>
+    </div>
+</div>

@@ -157,7 +157,9 @@
         
         <div tal:condition="the_game.winner in (None, -1)" style="margin-bottom:10px;">
             <span tal:condition="your_turn" style="font-weight:bold;">It is your turn</span>
-            <span tal:condition="not your_turn">You are waiting for your opponent to make their move.</span>
+            <span tal:condition="not your_turn">You are waiting for your opponent to make their move.
+                <span tal:condition="the_game.player1 == -1 or the_game.player2 == -1">The AI will not make a move until at least 3 minutes have passed. Come back in 3 minutes and it will make a move.</span>
+            </span>
         </div>
         <br /><br />
         
@@ -210,7 +212,7 @@
         </div>
         
         <div tal:condition="the_game.winner != None">
-            <div tal:condition="the_game.rematch == None">
+            <div tal:condition="the_game.rematch == None and the_game.player1 != -1 and the_game.player2 != -1">
                 <a href="${request.route_url('odummo.rematch', game_id=the_game.id)}" class="inbutton">Start rematch</a>
             </div>
             <div tal:condition="the_game.rematch != None">

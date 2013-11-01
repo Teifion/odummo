@@ -43,6 +43,12 @@
             <input type="text" name="opponent_name" value="${request.params.get('opponent_name', '')}" id="opponent_name"/><br />
             
             <input type="submit" id="main_submit" name="form.submitted" class="button" value="Start game" />
+            
+            <br /><br />
+            <h2 style="text-align:center;">Or...</h2>
+            <br />
+            
+            <a href="${request.route_url('odummo.new_ai_game')}" class="button">Play against the computer</a>
         </form>
         <br /><br /><br />
         
@@ -50,7 +56,7 @@
             You've not enabled matchmaking. If you enable it the system will be able to create games for you. You can enable matchmaking through your <a href="${request.route_url('odummo.preferences')}">preferences</a>.
             <br /><br />
             
-            Wordy will automatically not assign you any new games if you've not made any moves in the last two days.
+            Odummo will automatically not assign you any new games if you've not made any moves in the last two days.
         </div>
     </div>
     

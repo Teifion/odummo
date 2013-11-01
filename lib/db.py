@@ -22,6 +22,9 @@ from . import (
     rules,
 )
 
+ai_move_delay = timedelta(minutes=3)
+ai_move_delay = timedelta()
+
 def get_profile(user_id):
     the_profile = config['DBSession'].query(OdummoProfile).filter(OdummoProfile.user == user_id).first()
     
@@ -300,3 +303,46 @@ def get_stats(user_id, opponent_id=None):
     stats['win_ratio'] = rules.win_ratio(stats['games_won'], stats['completed_games'])
     
     return stats
+
+def find_ongoing_ai_game(user_id):
+    return config['DBSession'].query(
+        OdummoGame
+    ).filter(
+        or_(
+            and_(OdummoGame.player1 == user_id, OdummoGame.player2 == -1),
+            and_(OdummoGame.player2 == user_id, OdummoGame.player1 == -1)
+        ),
+        OdummoGame.winner == None
+    ).first()
+
+def new_ai_game(user_id):
+    return new_game(user_id, -1)
+
+def is_it_ai_move(the_game):
+    if the_game.winner != None:
+        return False
+    
+    if rules.current_player(the_game) == -1:
+        last_move = get_last_move(the_game.id)
+        
+        # No last move but it's the AI's turn? Make a move!
+        if last_move is None:
+            return True
+        
+        # Make sure we're not making moves too fast
+        if (last_move.timestamp + ai_move_delay) < datetime.now():
+            return True
+    
+    return False
+
+def get_last_move(game_id):
+    return config['DBSession'].query(OdummoMove).filter(OdummoMove.game == game_id).order_by(OdummoMove.timestamp.desc()).first()
+
+from ..ai.ai_position import step as ai_step
+def make_ai_move(the_game):
+    if the_game.player1 == -1: p = 2
+    else: p = 1
+    
+    square = ai_step(the_game.current_state, p)
+    
+    perform_move(the_game, square)

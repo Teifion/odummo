@@ -49,6 +49,8 @@ def includeme(config):
     
     # Game views
     config.add_route('odummo.new_game', '/new_game')
+    config.add_route('odummo.new_ai_game', '/new_ai_game')
+    config.add_route('odummo.ai_move', '/ai_move/{game_id}')
     config.add_route('odummo.rematch', '/rematch/{game_id}')
     
     config.add_route('odummo.view_game', '/game/{game_id}')
@@ -57,7 +59,9 @@ def includeme(config):
     config.add_route('odummo.check_turn', '/check_turn/{game_id}')
     
     config.add_view(game.new_game, route_name='odummo.new_game', renderer='templates/game/new_game.pt', permission='loggedin')
+    config.add_view(game.new_ai_game, route_name='odummo.new_ai_game', renderer='templates/game/new_ai_game.pt', permission='loggedin')
     config.add_view(game.rematch, route_name='odummo.rematch', renderer='string', permission='loggedin')
+    config.add_view(game.ai_move, route_name='odummo.ai_move', permission='loggedin')
     
     config.add_view(game.view_game, route_name='odummo.view_game', renderer='templates/game/view_game.pt', permission='loggedin')
     config.add_view(game.make_move, route_name='odummo.make_move', renderer='templates/game/make_move.pt', permission='loggedin')

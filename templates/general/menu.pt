@@ -33,10 +33,10 @@
             <div tal:condition="len(recent_list) != 0">
                 <strong>Recently completed games:</strong><br />
                 <a href="${request.route_url('odummo.view_game', game_id=g[0])}" tal:repeat="g recent_list" class="button">
-                    ${g[1]}
                     <span tal:condition="g[3] == the_user.id">Victory!</span>
                     <span tal:condition="g[3] != the_user.id and g[3] != -1">Defeat</span>
                     <span tal:condition="g[3] == -1">Draw</span>
+                     vs ${g[1]}
                     (Turn ${g[2]})
                 </a>
             </div>
