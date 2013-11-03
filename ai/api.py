@@ -57,7 +57,7 @@ def all_potential_moves(current_state, player):
 def visual_board(b):
     r = [" " + "-"*8]
     for i in range(8):
-        r.append('|' + b[i*8:(i+1)*8] + '|')
+        r.append('|' + b[i*8:(i+1)*8].replace(" ", ".") + '|')
     r.append(" " + "-"*8)
     return "\n".join(r)
 
@@ -122,7 +122,6 @@ def run_many_games(game_count, ai1, ai2):
     
     for i in range(game_count):
         moves, board = run_game(ai1.step, ai2.step)
-        
         ai1.game_over(moves, board, '1')
         ai2.game_over(moves, board, '2')
         

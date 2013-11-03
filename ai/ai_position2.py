@@ -1,6 +1,7 @@
 from random import choice
 from functools import reduce
 from . import api
+from collections import defaultdict
 
 """
 This is an AI designed to lose every time or close to it.
@@ -8,28 +9,55 @@ This is an AI designed to lose every time or close to it.
 
 name = "Position 2"
 
-_corners = 20
-_sides = 10
-_normal = 0
+str_values = """
+9 0 6 6 6 6 0 9
+0 0 1 1 1 1 0 0
+6 1 8 7 7 8 1 6
+6 1 7 3 3 7 1 6
+6 1 7 3 3 7 1 6
+6 1 8 7 7 8 1 6
+0 0 1 1 1 1 0 0
+9 0 6 6 6 6 0 9
+""".replace(" ", "").replace("\n", "", 1)
+
+values = {}
+for y, line in enumerate(str_values.split("\n")):
+    for x, v in enumerate(line):
+        values[(x,y)] = int(v)
+
+def _location_value(possible_move):
+    sx = possible_move.square % 8
+    sy = int((possible_move.square - sx) / 8)
+    
+    return values[(sx, sy)]
+
+def _take_value(square):
+    sx, sy = square
+    return values[(sx, sy)] * 3
 
 def _value(possible_move):
     sx = possible_move.square % 8
     sy = int((possible_move.square - sx) / 8)
     
-    if (sx, sy) in ((0,0), (7,0), (0,7), (7,7)):
-        return _corners + len(possible_move.flips)
-    
-    if sx in (0,7) or sy in (0,7):
-        return _sides + len(possible_move.flips)
-    
-    return _normal + len(possible_move.flips)
+    result = _location_value(possible_move) * 100
+    result += sum(map(_take_value, possible_move.flips))
+    return result
 
 def initialise():
     pass
 
 def step(b, player):
     moves = api.all_potential_moves(b, player)
-    prelude = lambda a, b: a if _value(a) < _value(b) else b
+    prelude = lambda a, b: a if _value(a) > _value(b) else b
+    
+    # print("\nPossible moves (for the board below)\n")
+    # for m in moves:
+    #     sx = m.square % 8
+    #     sy = int((m.square - sx) / 8)
+        
+    #     print(m.square, (sx, sy), _value(m))
+    # print("\n\n")
+    
     return reduce(prelude, moves).square
 
 def game_over(moves, board, player):

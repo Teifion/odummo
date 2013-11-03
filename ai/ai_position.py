@@ -1,41 +1,64 @@
 from random import choice
 from functools import reduce
 from . import api
+from collections import defaultdict
 
 """
-A simple AI that attempts to value corners and sides higher but otherwise
-move based on the number of flips it will perform.
+This is an AI designed to lose every time or close to it.
 """
 
-name = "Position"
+name = "Position 2"
 
-_corners = 20
-_sides = 10
-_normal = 0
-_bad = -10
+str_values = """
+9 0 6 6 6 6 0 9
+0 0 1 1 1 1 0 0
+6 1 8 4 4 8 1 6
+6 1 4 3 3 4 1 6
+6 1 4 3 3 4 1 6
+6 1 8 4 4 8 1 6
+0 0 1 1 1 1 0 0
+9 0 6 6 6 6 0 9
+""".replace(" ", "").replace("\n", "", 1)
+
+values = {}
+for y, line in enumerate(str_values.split("\n")):
+    for x, v in enumerate(line):
+        values[(x,y)] = int(v)
+
+def _location_value(possible_move):
+    sx = possible_move.square % 8
+    sy = int((possible_move.square - sx) / 8)
+    
+    return values[(sx, sy)]
+
+def _take_value(square):
+    sx, sy = square
+    return values[(sx, sy)] * 3
 
 def _value(possible_move):
     sx = possible_move.square % 8
     sy = int((possible_move.square - sx) / 8)
     
-    if (sx, sy) in ((0,0), (7,0), (0,7), (7,7)):
-        return _corners + len(possible_move.flips)
-    
-    if sx in (0,7) or sy in (0,7):
-        return _sides + len(possible_move.flips)
-    
-    if sx in (1,6) or sy in (1,6):
-        return _bad + len(possible_move.flips)
-    
-    return _normal + len(possible_move.flips)
+    result = _location_value(possible_move) * 100
+    result += sum(map(_take_value, possible_move.flips))
+    return result
 
 def initialise():
     pass
 
 def step(b, player):
     moves = api.all_potential_moves(b, player)
-    prelude = lambda a, b: a if _value(a) > _value(b) else b
-    return reduce(prelude, moves).square
+    
+    possibles = defaultdict(list)
+    for m in moves:
+        v = _value(m)
+        possibles[v].append(m)
+    
+    keys = list(possibles.keys())
+    keys.sort()
+    keys.reverse()
+    
+    return choice(possibles[keys[0]]).square
 
 def game_over(moves, board, player):
     pass

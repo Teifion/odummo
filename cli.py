@@ -34,6 +34,9 @@ def main():
     ai1 = importlib.import_module("ai.ai_%s" % args.ai1)
     ai2 = importlib.import_module("ai.ai_%s" % args.ai2)
     
+    print("Player 1: %s" % (ai1.name))
+    print("Player 2: %s" % (ai2.name))
+    
     game_count = int(args.game_count)
     game_iter = api.run_many_games(game_count, ai1, ai2)
     

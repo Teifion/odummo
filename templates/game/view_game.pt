@@ -221,11 +221,11 @@
                 <a href="${request.route_url('odummo.rematch', game_id=the_game.id)}" class="inbutton">Start rematch</a>
             </div>
             <div tal:condition="the_game.rematch != None">
-                <a href="${request.route_url('odummo.game', game_id=the_game.rematch)}" class="inbutton">Goto rematch</a>
+                <a href="${request.route_url('odummo.view_game', game_id=the_game.rematch)}" class="inbutton">Goto rematch</a>
             </div>
         </div>
         <div tal:condition="the_game.source != None">
-            <a href="${request.route_url('odummo.game', game_id=the_game.source)}" class="inbutton">Goto previous game</a>
+            <a href="${request.route_url('odummo.view_game', game_id=the_game.source)}" class="inbutton">Goto previous game</a>
         </div>
     </div>
     

@@ -166,24 +166,24 @@ def rematch(request):
     the_user = config['get_user_func'](request)
     game_id  = int(request.matchdict['game_id'])
     the_game = db.get_game(game_id)
-    
+   
     # Not a player? Send them back to the menu
     if the_user.id != the_game.player1 and the_user.id != the_game.player2:
         return HTTPFound(location=request.route_url("odummo.menu"))
-    
+   
     # Not over yet? Send them back to the game in question.
     if the_game.winner == None:
         return HTTPFound(location=request.route_url("odummo.view_game", game_id=game_id))
-    
+   
     if the_user.id == the_game.player1:
         opponent = db.find_user(the_game.player2)
     else:
         opponent = db.find_user(the_game.player1)
-    
-    newgame_id = db.new_game(the_user, opponent, rematch=game_id)
+   
+    newgame_id = db.new_game(the_user.id, opponent.id, rematch=game_id)
     the_game.rematch = newgame_id
-    
-    # com_send(opponent.id, "odummo.new_game", "{} has started a game against you".format(the_user.name), str(newgame_id), timedelta(hours=24))
+   
+    com_send(opponent.id, "odummo.new_game", "{} has started a game against you".format(the_user.name), str(newgame_id), timedelta(hours=24))
     return HTTPFound(location=request.route_url("odummo.view_game", game_id=newgame_id))
 
 def check_turn(request):

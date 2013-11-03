@@ -23,7 +23,7 @@ from . import (
 )
 
 ai_move_delay = timedelta(minutes=3)
-# ai_move_delay = timedelta()
+ai_move_delay = timedelta()
 
 def get_profile(user_id):
     the_profile = config['DBSession'].query(OdummoProfile).filter(OdummoProfile.user == user_id).first()
