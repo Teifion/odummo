@@ -23,6 +23,7 @@ def odummo_notifications():
     
     from .lib.notifications import forward_to_game, forward_to_profile
     
+    register('odummo.new_game', 'New game', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
     register('odummo.new_move', 'New move', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
     register('odummo.end_game', 'Game over', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)
     register('odummo.win_game', 'Victory!', 'http://localhost:6543/static/images/communique/odummo.png', forward_to_game)

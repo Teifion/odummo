@@ -181,6 +181,11 @@ class OdummoDBTester(DBTestClass):
             expect_forward = "/odummo/game/{}".format(game_id)
         )
         
+        # Lets check our turn too
+        self.make_request(app, "/odummo/check_turn/{}".format(game_id), cookies,
+            msg="Error checking the turn",
+        )
+        
         # Now lets check for win conditions
         the_game = config['DBSession'].query(OdummoGame).filter(OdummoGame.id == game_id).first()
         with transaction.manager:
@@ -208,5 +213,8 @@ class OdummoDBTester(DBTestClass):
             msg="Error viewing the game once completed"
         )
         
-        self.fail("Rematch is not yet tested")
-        self.fail("Check turn is not yet tested")
+        # Now rematch it
+        self.make_request(app, "/odummo/rematch/{}".format(game_id), cookies,
+            msg = "Error trying to rematch",
+            expect_forward = re.compile("/odummo/game/[0-9]+")
+        )
